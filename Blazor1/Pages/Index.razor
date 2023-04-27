@@ -146,36 +146,32 @@
                         result.Append($"Insufficient arguments.\n\n");
                         break;
                     case 2:
-                        var type2 = properties[1] switch
+                        result.AppendFormat(properties[1] switch
                         {
                             var a when a.Contains("int", StringComparison.OrdinalIgnoreCase) =>
-                                $"public int {properties[0]} {{ get; set; }}\n\n",
+                                "public int {0} { get; set; }\n\n",
                             var b when b.Contains("date", StringComparison.OrdinalIgnoreCase) =>
-                                $"public DateTime {properties[0]} {{ get; set; }}\n\n",
+                                "public DateTime {0} { get; set; }\n\n",
                             var b when b.Contains("bit", StringComparison.OrdinalIgnoreCase) =>
-                                $"public bool {properties[0]} {{ get; set; }}\n\n",
+                                "public bool {0} { get; set; }\n\n",
                             var b when b.Contains("unique", StringComparison.OrdinalIgnoreCase) =>
-                                $"public Guid {properties[0]} {{ get; set; }}\n\n",
-                            _ => $"public string {properties[0]} {{ get; set; }}\n\n"
-                        };
-                        result.Append(type2);
+                                "public Guid {0} { get; set; }\n\n",
+                            _ => "public string {0} { get; set; }\n\n"
+                        }, properties[0]);
                         break;
                     case 3:
-                        var isNull = properties[2].Contains("not")
-                            ? "" : "?";
-                        var type3 = properties[1] switch
+                        result.AppendFormat(properties[1] switch
                         {
                             var a when a.Contains("int", StringComparison.OrdinalIgnoreCase) =>
-                                $"public int{isNull} {properties[0]} {{ get; set; }}\n\n",
+                                "public int{1} {0} { get; set; }\n\n",
                             var b when b.Contains("date", StringComparison.OrdinalIgnoreCase) =>
-                                $"public DateTime{isNull} {properties[0]} {{ get; set; }}\n\n",
+                                "public DateTime{1} {0} { get; set; }\n\n",
                             var b when b.Contains("bit", StringComparison.OrdinalIgnoreCase) =>
-                                $"public bool{isNull} {properties[0]} {{ get; set; }}\n\n",
+                                "public bool{1} {0} { get; set; }\n\n",
                             var b when b.Contains("unique", StringComparison.OrdinalIgnoreCase) =>
-                                $"public Guid {properties[0]} {{ get; set; }}\n\n",
-                            _ => $"public string{isNull} {properties[0]} {{ get; set; }}\n\n"
-                        };
-                        result.Append(type3);
+                                "public Guid{1} {0} { get; set; }\n\n",
+                            _ => "public string{1} {properties[0]} {{ get; set; }}\n\n"
+                        }, properties[0], properties[2].Contains("not") ? "" : "?");
                         break;
                     default:
                         break;
@@ -188,6 +184,4 @@
             output = ex.Message;
         }
     }
-
-
 }
