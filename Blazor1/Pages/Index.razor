@@ -170,7 +170,7 @@
                                 "public bool{1} {0} { get; set; }\n\n",
                             var b when b.Contains("unique", StringComparison.OrdinalIgnoreCase) =>
                                 "public Guid{1} {0} { get; set; }\n\n",
-                            _ => "public string{1} {properties[0]} {{ get; set; }}\n\n"
+                            _ => "public string{1} {0} { get; set; }\n\n"
                         }, properties[0], properties[2].Contains("not", StringComparison.OrdinalIgnoreCase) ? "" : "?");
                         break;
                     default:
