@@ -1,0 +1,193 @@
+﻿@page "/"
+@using System.Text;
+
+<PageTitle>Index</PageTitle>
+
+<h1 class="bg-primary text-center">Transformer</h1>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-4">
+            <textarea rows="35" cols="65" @bind-value="input" @bind-value:event="onchange" />
+        </div>
+        <div class="col-4">
+            <div class="container">
+                <div class="row">
+                    <div class="col d-grid gap-2">
+                        <button class="btn btn-outline-primary" @onclick="Int">Int</button>
+                        <button class="btn btn-outline-primary" @onclick="Entity">Entity</button>
+                        <button class="btn btn-outline-primary" @onclick="Snippet">Snippet</button>
+                    </div>
+                    <div class="col d-grid gap-2">
+                        <button class="btn btn-outline-primary" @onclick="StrDouble">"Str"</button>
+                        <button class="btn btn-outline-primary" @onclick="StrSingle">'Str'</button>
+                    </div>
+                    <div class="col d-grid gap-2">
+                        <button class="btn btn-outline-primary" @onclick="MixDouble">"Mix"</button>
+                        <button class="btn btn-outline-primary" @onclick="MixSingle">'Mix'</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <textarea rows="35" cols="65" @bind-value="output" @bind-value:event="onchange" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private string input { get; set; } = string.Empty;
+    private string output { get; set; } = string.Empty;
+    private string error { get; set; } = "Input box is empty.";
+
+    private void Int() =>
+        output = string.IsNullOrEmpty(input)
+            ? error
+            : input.Replace(Environment.NewLine, ", ");
+
+    private void StrDouble() =>
+        output = string.IsNullOrEmpty(input)
+            ? error
+            : string.Concat("\"", input.Replace(Environment.NewLine, "\", \""), "\"");
+
+    private void StrSingle() =>
+        output = string.IsNullOrEmpty(input)
+            ? error
+            : string.Concat("'", input.Replace(Environment.NewLine, "', '"), "'");
+
+    private void Snippet() =>
+        output = string.IsNullOrEmpty(input)
+            ? error
+            : string.Concat("\"", input.Replace(Environment.NewLine, "\",\n\"").Replace("\t", "\\t").Replace("  ", "\\t"), "\"");
+
+    private void MixDouble()
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            output = error;
+            return;
+        }
+        try
+        {
+            var inArray = input.Split(Environment.NewLine);
+            var result = new StringBuilder();
+
+            foreach (var item in inArray)
+            {
+                if (int.TryParse(item, out var isInt))
+                {
+                    result.Append($"{isInt},");
+                }
+                else
+                {
+                    result.Append($"\"{item}\",");
+                }
+            }
+            result.Length--;
+            output = result.ToString();
+        }
+        catch (Exception ex)
+        {
+            output = ex.Message;
+        }
+    }
+
+    private void MixSingle()
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            output = error;
+            return;
+        }
+        try
+        {
+            var inArray = input.Split(Environment.NewLine);
+            var result = new StringBuilder();
+
+            foreach (var item in inArray)
+            {
+                if (int.TryParse(item, out var isInt))
+                {
+                    result.Append($"{isInt},");
+                }
+                else
+                {
+                    result.Append($"'{item}',");
+                }
+            }
+            result.Length--;
+            output = result.ToString();
+        }
+        catch (Exception ex)
+        {
+            output = ex.Message;
+        }
+    }
+
+    private void Entity()
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            output = error;
+            return;
+        }
+        try
+        {
+            var lines = input.Split(Environment.NewLine);
+            var result = new StringBuilder();
+
+            foreach (var line in lines)
+            {
+                var properties = line.Split("\t");
+
+                switch (properties.Length)
+                {
+                    case 1:
+                        result.Append($"Insufficient arguments.\n\n");
+                        break;
+                    case 2:
+                        var type2 = properties[1] switch
+                        {
+                            var a when a.Contains("int", StringComparison.OrdinalIgnoreCase) =>
+                                $"public int {properties[0]} {{ get; set; }}\n\n",
+                            var b when b.Contains("date", StringComparison.OrdinalIgnoreCase) =>
+                                $"public DateTime {properties[0]} {{ get; set; }}\n\n",
+                            var b when b.Contains("bit", StringComparison.OrdinalIgnoreCase) =>
+                                $"public bool {properties[0]} {{ get; set; }}\n\n",
+                            var b when b.Contains("unique", StringComparison.OrdinalIgnoreCase) =>
+                                $"public Guid {properties[0]} {{ get; set; }}\n\n",
+                            _ => $"public string {properties[0]} {{ get; set; }}\n\n"
+                        };
+                        result.Append(type2);
+                        break;
+                    case 3:
+                        var isNull = properties[2].Contains("not")
+                            ? "" : "?";
+                        var type3 = properties[1] switch
+                        {
+                            var a when a.Contains("int", StringComparison.OrdinalIgnoreCase) =>
+                                $"public int{isNull} {properties[0]} {{ get; set; }}\n\n",
+                            var b when b.Contains("date", StringComparison.OrdinalIgnoreCase) =>
+                                $"public DateTime{isNull} {properties[0]} {{ get; set; }}\n\n",
+                            var b when b.Contains("bit", StringComparison.OrdinalIgnoreCase) =>
+                                $"public bool{isNull} {properties[0]} {{ get; set; }}\n\n",
+                            var b when b.Contains("unique", StringComparison.OrdinalIgnoreCase) =>
+                                $"public Guid {properties[0]} {{ get; set; }}\n\n",
+                            _ => $"public string{isNull} {properties[0]} {{ get; set; }}\n\n"
+                        };
+                        result.Append(type3);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            output = result.ToString();
+        }
+        catch (Exception ex)
+        {
+            output = ex.Message;
+        }
+    }
+
+
+}
