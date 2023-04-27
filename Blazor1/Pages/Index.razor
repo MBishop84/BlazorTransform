@@ -82,14 +82,11 @@
 
             foreach (var item in inArray)
             {
-                if (int.TryParse(item, out var isInt))
+                result.AppendFormat(item switch
                 {
-                    result.Append($"{isInt},");
-                }
-                else
-                {
-                    result.Append($"\"{item}\",");
-                }
+                    var a when int.TryParse(a, out var ignore) => "{0},",
+                    _ => "\"{0}\","
+                }, item);
             }
             result.Length--;
             output = result.ToString();
@@ -114,14 +111,11 @@
 
             foreach (var item in inArray)
             {
-                if (int.TryParse(item, out var isInt))
+                result.AppendFormat(item switch
                 {
-                    result.Append($"{isInt},");
-                }
-                else
-                {
-                    result.Append($"'{item}',");
-                }
+                    var a when int.TryParse(a, out var ignore) => "{0},",
+                    _ => "'{0}',"
+                }, item);
             }
             result.Length--;
             output = result.ToString();
@@ -134,7 +128,34 @@
 
     private void Json()
     {
-        output = "Not Implemented.";
+        if (string.IsNullOrEmpty(input))
+        {
+            output = error;
+            return;
+        }
+        try
+        {
+            var cols = input.Split(Environment.NewLine)[0].Split("\t");
+            var values = input.Split(Environment.NewLine)[1].Split("\t");
+            var result = new StringBuilder();
+
+            for (var x = 0; x < cols.Length; x++)
+            {
+                result.AppendFormat(values[x] switch
+                {
+                    var a when int.TryParse(a, out int ignored) => "\"{0}\":{1},\n",
+                    var b when b.Equals("null", StringComparison.OrdinalIgnoreCase) => string.Empty,
+                    var c when string.IsNullOrEmpty(c) => string.Empty,
+                    _ => "\"{0}\":\"{1}\",\n"
+                }, cols[x], values[x]);
+            }
+            result.Length -= 2;
+            output = $"{{\n{result}\n}}";
+        }
+        catch(Exception ex)
+        {
+            output = ex.Message;
+        }
     }
 
     private void Entity()
