@@ -21,10 +21,12 @@
                     <div class="col d-grid gap-2">
                         <button class="btn btn-outline-primary" @onclick="StrDouble">"Str"</button>
                         <button class="btn btn-outline-primary" @onclick="StrSingle">'Str'</button>
+                        <button class="btn btn-outline-primary" @onclick="Json">json</button>
                     </div>
                     <div class="col d-grid gap-2">
                         <button class="btn btn-outline-primary" @onclick="MixDouble">"Mix"</button>
                         <button class="btn btn-outline-primary" @onclick="MixSingle">'Mix'</button>
+                        <button class="btn btn-outline-warning" @onclick="Clear">Clear</button>
                     </div>
                 </div>
             </div>
@@ -39,6 +41,12 @@
     private string input { get; set; } = string.Empty;
     private string output { get; set; } = string.Empty;
     private string error { get; set; } = "Input box is empty.";
+
+    private void Clear()
+    {
+        input = string.Empty;
+        output = string.Empty;
+    }
 
     private void Int() =>
         output = string.IsNullOrEmpty(input)
@@ -122,6 +130,11 @@
         {
             output = ex.Message;
         }
+    }
+
+    private void Json()
+    {
+        output = "Not Implemented.";
     }
 
     private void Entity()
