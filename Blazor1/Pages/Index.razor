@@ -3,36 +3,52 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1 class="bg-primary text-center">Transformer</h1>
-
+<h1 class="text-center">Transformer</h1>
+<hr />
 <div class="container-fluid">
     <div class="row">
         <div class="col-4">
-            <textarea rows="35" cols="65" @bind-value="input" @bind-value:event="onchange" />
+            <textarea rows="35" cols="60" @bind-value="input" @bind-value:event="onchange" />
         </div>
         <div class="col-4">
             <div class="container">
                 <div class="row">
-                    <div class="col d-grid gap-2">
+                    <div class="col d-grid">
                         <button class="btn btn-outline-primary" @onclick="Int">Int</button>
+                    </div>
+                    <div class="col d-grid">
+                        <button class="btn btn-outline-primary" @onclick="StrDouble">"Str"</button>
+                    </div>
+                    <div class="col d-grid">
+                        <button class="btn btn-outline-primary" @onclick="MixDouble">"Mix"</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col d-grid">
                         <button class="btn btn-outline-primary" @onclick="Entity">Entity</button>
+                    </div>
+                    <div class="col d-grid">
+                        <button class="btn btn-outline-primary" @onclick="StrSingle">'Str'</button>
+                    </div>
+                    <div class="col d-grid">
+                        <button class="btn btn-outline-primary" @onclick="MixSingle">'Mix'</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col d-grid">
                         <button class="btn btn-outline-primary" @onclick="Snippet">Snippet</button>
                     </div>
-                    <div class="col d-grid gap-2">
-                        <button class="btn btn-outline-primary" @onclick="StrDouble">"Str"</button>
-                        <button class="btn btn-outline-primary" @onclick="StrSingle">'Str'</button>
+                    <div class="col d-grid">
                         <button class="btn btn-outline-primary" @onclick="Json">json</button>
                     </div>
-                    <div class="col d-grid gap-2">
-                        <button class="btn btn-outline-primary" @onclick="MixDouble">"Mix"</button>
-                        <button class="btn btn-outline-primary" @onclick="MixSingle">'Mix'</button>
+                    <div class="col d-grid">
                         <button class="btn btn-outline-warning" @onclick="Clear">Clear</button>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-4">
-            <textarea rows="35" cols="65" @bind-value="output" @bind-value:event="onchange" />
+            <textarea rows="35" cols="60" @bind-value="output" @bind-value:event="onchange" />
         </div>
     </div>
 </div>
@@ -152,7 +168,7 @@
             result.Length -= 2;
             output = $"{{\n{result}\n}}";
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             output = ex.Message;
         }
@@ -173,39 +189,40 @@
             foreach (var line in lines)
             {
                 var properties = line.Split("\t");
-
+                result.AppendFormat("///<summary>\n/// Gets/Sets the {0}.\n///<summary>\n", properties[0]);
                 switch (properties.Length)
                 {
                     case 1:
                         result.Append($"Insufficient arguments.\n\n");
                         break;
                     case 2:
-                        result.AppendFormat(properties[1] switch
+                        result.Append(properties[1] switch
                         {
                             var a when a.Contains("int", StringComparison.OrdinalIgnoreCase) =>
-                                "public int {0} { get; set; }\n\n",
+                                $"public int {properties[0]} {{ get; set; }}\n\n",
                             var b when b.Contains("date", StringComparison.OrdinalIgnoreCase) =>
-                                "public DateTime {0} { get; set; }\n\n",
+                                $"public DateTime {properties[0]} {{ get; set; }}\n\n",
                             var b when b.Contains("bit", StringComparison.OrdinalIgnoreCase) =>
-                                "public bool {0} { get; set; }\n\n",
+                                $"public bool {properties[0]} {{ get; set; }}\n\n",
                             var b when b.Contains("unique", StringComparison.OrdinalIgnoreCase) =>
-                                "public Guid {0} { get; set; }\n\n",
-                            _ => "public string {0} { get; set; }\n\n"
-                        }, properties[0]);
+                                $"public Guid {properties[0]} {{ get; set; }}\n\n",
+                            _ => $"public string {properties[0]} {{ get; set; }}\n\n"
+                        });
                         break;
                     case 3:
-                        result.AppendFormat(properties[1] switch
+                        string isNullable = properties[2].Equals("YES", StringComparison.OrdinalIgnoreCase) ? "" : "?";
+                        result.Append(properties[1] switch
                         {
                             var a when a.Contains("int", StringComparison.OrdinalIgnoreCase) =>
-                                "public int{1} {0} { get; set; }\n\n",
+                                $"public int{isNullable} {properties[0]} {{ get; set; }}\n\n",
                             var b when b.Contains("date", StringComparison.OrdinalIgnoreCase) =>
-                                "public DateTime{1} {0} { get; set; }\n\n",
+                                $"public DateTime{isNullable} {properties[0]} {{ get; set; }}\n\n",
                             var b when b.Contains("bit", StringComparison.OrdinalIgnoreCase) =>
-                                "public bool{1} {0} { get; set; }\n\n",
+                                $"public bool{isNullable} {properties[0]} {{ get; set; }}\n\n",
                             var b when b.Contains("unique", StringComparison.OrdinalIgnoreCase) =>
-                                "public Guid{1} {0} { get; set; }\n\n",
-                            _ => "public string{1} {0} { get; set; }\n\n"
-                        }, properties[0], properties[2].Contains("not", StringComparison.OrdinalIgnoreCase) ? "" : "?");
+                                $"public Guid{isNullable} {properties[0]} {{ get; set; }}\n\n",
+                            _ => $"public string{isNullable} {properties[0]} {{ get; set; }}\n\n"
+                        });
                         break;
                     default:
                         break;
