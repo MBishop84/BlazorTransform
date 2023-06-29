@@ -45,6 +45,15 @@
                         <button class="btn btn-outline-warning" @onclick="Clear">Clear</button>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col d-grid">
+                    </div>
+                    <div class="col d-grid">
+                        <button class="btn btn-outline-primary" @onclick="Fire">&#128520;</button>
+                    </div>
+                    <div class="col d-grid">
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-4">
@@ -82,7 +91,7 @@
     private void Snippet() =>
         output = string.IsNullOrEmpty(input)
             ? error
-            : string.Concat("\"", input.Replace(Environment.NewLine, "\",\n\"").Replace("\t", "\\t").Replace("  ", "\\t"), "\"");
+            : string.Concat("\"", input.Replace(Environment.NewLine, "\",\n\"").Replace("\t", "\\t").Replace("    ", "\\t"), "\"");
 
     private void MixDouble()
     {
@@ -227,6 +236,24 @@
                     default:
                         break;
                 }
+            }
+            output = result.ToString();
+        }
+        catch (Exception ex)
+        {
+            output = ex.Message;
+        }
+    }
+
+    private void Fire()
+    {
+        try
+        {
+            var lines = input.Split(Environment.NewLine);
+            var result = new StringBuilder();
+            for(var x = 5; x < 50; x++)
+            {
+                result.AppendLine($"<Address{x}>{lines[x]}</Address{x}>");
             }
             output = result.ToString();
         }
