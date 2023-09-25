@@ -2,12 +2,15 @@
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-var factory = new ConnectionFactory { HostName = "localhost" };
+var factory = new ConnectionFactory 
+{ 
+    HostName = "localhost"
+};
 using var connection = factory.CreateConnection();
 using var channel = connection.CreateModel();
 
-channel.QueueDeclare(queue: "hello",
-                     durable: false,
+channel.QueueDeclare(queue: "helloD",
+                     durable: true,
                      exclusive: false,
                      autoDelete: false,
                      arguments: null);
@@ -28,7 +31,7 @@ consumer.Received += (model, ea) =>
     channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 }; 
 
-channel.BasicConsume(queue: "hello",
+channel.BasicConsume(queue: "helloD",
                      autoAck: false,
                      consumer: consumer);
 

@@ -1,59 +1,42 @@
 ﻿@page "/fetchdata"
+@using System.Text;
+@using System.DirectoryServices.AccountManagement;
+@using System.DirectoryServices;
 @inject HttpClient Http
 
-<PageTitle>Weather forecast</PageTitle>
+<PageTitle>Managers</PageTitle>
 
-<h1>Weather forecast</h1>
+<h1>Managers</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
+<p>This component demonstrates fetching data from ActiveDirectory.</p>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table tbl-dark">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<button class="btn btn-outline-primary" @onclick="Run">&#128520;</button>
+<br>
+<br>
+<textarea rows="30" cols="60" @bind-value="output" @bind-value:event="onchange" />
 
 @code {
-    private WeatherForecast[]? forecasts;
-    // q: what is the blazor class for a dark table.
+    private string output { get; set; } = string.Empty;
 
-
-    protected override async Task OnInitializedAsync()
+    private void Run()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
-    }
-
-    public class WeatherForecast
-    {
-        public DateTime Date { get; set; }
-
-        public int TemperatureC { get; set; }
-
-        public string? Summary { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        var result = new StringBuilder();
+        try
+        {
+            using (PrincipalContext context = new(ContextType.Domain, "NGIC"))
+            {
+                var user = UserPrincipal.FindByIdentity(context, "I829478");
+                var directoryEntry = user.GetUnderlyingObject() as DirectoryEntry;
+                foreach (var item in directoryEntry.Properties)
+                {
+                    result.AppendLine($"{item}");
+                }
+            }
+            output = result.ToString();
+        }
+        catch (Exception ex)
+        {
+            output = ex.ToString();
+        }
     }
 }
